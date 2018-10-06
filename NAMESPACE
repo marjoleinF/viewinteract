@@ -1,0 +1,3 @@
+export("get_rules")
+importFrom("stats", "na.omit", "predict", "var")
+import("rpart")
