@@ -34,16 +34,16 @@ The result is a list with three objects: matrices `rules_main` and `ruleS_intera
 
 ``` r
 dim(new_views$rules_main)
-#> [1]  111 1473
+#> [1] 111 187
 dim(new_views$rules_interact)
-#> [1]  111 1946
+#> [1] 111 482
 ```
 
 For example, the first three single-condition rules for the first six observations look as follows:
 
 ``` r
 new_views$rules_main[1:6, 1:3]
-#>      rule1 rule2 rule8
+#>      rule1 rule2 rule9
 #> [1,]     1     0     1
 #> [2,]     1     1     1
 #> [3,]     1     1     1
@@ -74,10 +74,10 @@ head(new_views$dictionary, n = 8L)
 #> 2   rule2              Solar.R< 5.03        main     1     2
 #> 4   rule4 Temp< 82.5 & Solar.R< 5.03 interaction     1     2
 #> 5   rule5 Temp< 82.5 & Solar.R>=5.03 interaction     1     2
-#> 8   rule8                 Temp< 82.5        main     1     2
 #> 9   rule9                Temp< 4.363        main     1     2
 #> 11 rule11   Temp< 82.5 & Temp< 4.363 interaction     1     2
 #> 12 rule12   Temp< 82.5 & Temp>=4.363 interaction     1     2
+#> 15 rule15                 Temp< 77.5        main     1     2
 ```
 
 Work to do

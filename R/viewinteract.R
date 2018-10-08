@@ -274,6 +274,10 @@ get_rules <- function(views, y, ntrees = 500, sampfrac = .632, learnrate = .01) 
   colnames(rulemat) <- dictionary$rule <- paste0("rule", 1:ncol(rulemat))
   rulemat <- rulemat[ , colSums(is.na(rulemat)) == 0]
   dictionary <- na.omit(dictionary)
+  unique_rules <- !duplicated(dictionary$description)
+  dictionary <- dictionary[unique_rules,]
+  rulemat <- rulemat[,unique_rules]
+  ## TODO: identify collinear rules
   rules_main <- rulemat[,colnames(rulemat) %in% 
                           dictionary$rule[dictionary$ruletype == "main"]]
   rules_interact <- rulemat[,colnames(rulemat) %in% 
