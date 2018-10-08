@@ -34,9 +34,9 @@ The result is a list with three objects: matrices `rules_main` and `ruleS_intera
 
 ``` r
 dim(new_views$rules_main)
-#> [1] 111 187
+#> [1] 111  78
 dim(new_views$rules_interact)
-#> [1] 111 482
+#> [1] 111 227
 ```
 
 For example, the first three single-condition rules for the first six observations look as follows:
@@ -84,4 +84,4 @@ Work to do
 ----------
 
 -   When gradient boosting is not employed (i.e., `learnrate = 0`), perfectly pure nodes will yield an error
--   Rules that are perfectly collinear (i.e., yield the exact same 0-1 indicator variables, or the exact opposite pattern) should be identified and eliminated.
+-   Rules that are perfectly negatively correlated (i.e., yield the exact opposite 0-1 pattern) should be identified and eliminated.
