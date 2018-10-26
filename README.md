@@ -10,7 +10,8 @@ We first create a list of two views of the same observations from the airquality
 
 ``` r
 viewA <- na.omit(airquality)[-1]
-viewB <- log(viewA)
+viewB <- cbind(log(viewA), log(viewA))
+names(viewB) <- paste0(names(viewA), rep(1:2, each = ncol(viewA)))
 views <- list(viewA, viewB)
 ```
 
@@ -69,15 +70,15 @@ The `dictionary` shows the conditions for each rule in `rules_main` and `rules_i
 
 ``` r
 head(new_views$dictionary, n = 8L)
-#>      rule                description    ruletype view1 view2
-#> 1   rule1                 Temp< 82.5        main     1     2
-#> 2   rule2              Solar.R< 5.03        main     1     2
-#> 4   rule4 Temp< 82.5 & Solar.R< 5.03 interaction     1     2
-#> 5   rule5 Temp< 82.5 & Solar.R>=5.03 interaction     1     2
-#> 9   rule9                Temp< 4.363        main     1     2
-#> 11 rule11   Temp< 82.5 & Temp< 4.363 interaction     1     2
-#> 12 rule12   Temp< 82.5 & Temp>=4.363 interaction     1     2
-#> 15 rule15                 Temp< 77.5        main     1     2
+#>      rule                 description    ruletype view1 view2
+#> 1   rule1                  Temp< 82.5        main     1     2
+#> 2   rule2              Solar.R1< 5.03        main     1     2
+#> 4   rule4 Temp< 82.5 & Solar.R1< 5.03 interaction     1     2
+#> 5   rule5 Temp< 82.5 & Solar.R1>=5.03 interaction     1     2
+#> 9   rule9                Temp1< 4.363        main     1     2
+#> 11 rule11   Temp< 82.5 & Temp1< 4.363 interaction     1     2
+#> 12 rule12   Temp< 82.5 & Temp1>=4.363 interaction     1     2
+#> 15 rule15                  Temp< 77.5        main     1     2
 ```
 
 Work to do
@@ -85,3 +86,4 @@ Work to do
 
 -   When gradient boosting is not employed (i.e., `learnrate = 0`), perfectly pure nodes will yield an error
 -   Rules that are perfectly negatively correlated (i.e., yield the exact opposite 0-1 pattern) should be identified and eliminated.
+-   Duplicate rules are identified currently within views with main and interaction rules separately. Should we keep it like that? Or should a main effect rule be preferred over a perfectly correlated interaction effect rule?

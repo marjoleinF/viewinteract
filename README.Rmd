@@ -24,7 +24,8 @@ We first create a list of two views of the same observations from the airquality
 
 ```{r, results = FALSE}
 viewA <- na.omit(airquality)[-1]
-viewB <- log(viewA)
+viewB <- cbind(log(viewA), log(viewA))
+names(viewB) <- paste0(names(viewA), rep(1:2, each = ncol(viewA)))
 views <- list(viewA, viewB)
 ```
 
@@ -74,3 +75,4 @@ head(new_views$dictionary, n = 8L)
 
 - When gradient boosting is not employed (i.e., `learnrate = 0`), perfectly pure nodes will yield an error
 - Rules that are perfectly negatively correlated (i.e., yield the exact opposite 0-1 pattern) should be identified and eliminated.
+- Duplicate rules are identified currently within views with main and interaction rules separately. Should we keep it like that? Or should a main effect rule be preferred over a perfectly correlated interaction effect rule?

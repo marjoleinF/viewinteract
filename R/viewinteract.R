@@ -129,7 +129,7 @@ get_rules <- function(views, y, ntrees = 500, sampfrac = .632, learnrate = .01) 
   if (any(is.na(y))) {
     stop("Response variable y does but should not contain missings.")
   }
-  if (any(colSums(sapply(views, is.na)) > 0)) {
+  if (any(sapply(sapply(sapply(views, is.na), colSums), sum) > 0)) {
     stop("One or more views do but should not contain missings.")    
   }
   
