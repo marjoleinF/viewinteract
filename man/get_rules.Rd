@@ -3,7 +3,7 @@
 \name{get_rules}
 \alias{get_rules}
 \title{Function for generating rule sets with main and interaction
-effects between a set of views}
+effects between pairs of data views}
 \usage{
 get_rules(views, y, ntrees = 500, sampfrac = 0.632, learnrate = 0.01)
 }
@@ -32,13 +32,21 @@ values are likely to perform best, which is reflected in the default
 learing rate of .01.}
 }
 \value{
-A named list of three objects: \code{rules_main}, 
-\code{rules_interact} and \code{dictionaty}. The first is a matrix, 
-with 0-1 coded indicator variables for rules with one
-condition. The second is a matrix with o-1 coded indicator variables 
-for rules with two conditions. Two-condition rules always contain 
-conditions involving two variables from different views, thereby
-accomodating cross-view interactions.
+A named list containing two objects: \code{rules} and 
+\code{dictionaries}. In turn, both contain three objects, named
+\code{view1}, \code{view2} and \code{interact}. If view names were 
+specified in the \code{views} argument, the \code{view1} and 
+\code{view2} will be replaced by the names of the respective views.
+
+The objects in \code{rules} are matrices, composed of 0-1 coded variables for 
+every rule, taking a value of 1 if the condition(s) of the rule apply, 0 if 
+the condition(s) of the rule do not apply. The objects in 
+\code{dictionaries} contain the conditions for every rule. 
+
+The \code{interaction} objects contain rules with conditions on variables
+from two different views. These rules can accomodate cross-view interactions.
+The other objects contain rules with conditions on a single variable (thereby 
+accomodating main effects only).
 }
 \description{
 \code{get_rules} generates rules containing main and interacion

@@ -80,7 +80,7 @@ get_y_learn_logistic <- function(eta, y) {
 
 
 #' Function for generating rule sets with main and interaction
-#' effects between a set of views
+#' effects between pairs of data views
 #' 
 #' \code{get_rules} generates rules containing main and interacion
 #' effects from the specified set of views.
@@ -103,13 +103,21 @@ get_y_learn_logistic <- function(eta, y) {
 #' Higher values increase the influence of earlier trees. Small non-zero
 #' values are likely to perform best, which is reflected in the default
 #' learing rate of .01.
-#' @return A named list of three objects: \code{rules_main}, 
-#' \code{rules_interact} and \code{dictionaty}. The first is a matrix, 
-#' with 0-1 coded indicator variables for rules with one
-#' condition. The second is a matrix with o-1 coded indicator variables 
-#' for rules with two conditions. Two-condition rules always contain 
-#' conditions involving two variables from different views, thereby
-#' accomodating cross-view interactions.
+#' @return A named list containing two objects: \code{rules} and 
+#' \code{dictionaries}. In turn, both contain three objects, named
+#' \code{view1}, \code{view2} and \code{interact}. If view names were 
+#' specified in the \code{views} argument, the \code{view1} and 
+#' \code{view2} will be replaced by the names of the respective views.
+#' 
+#' The objects in \code{rules} are matrices, composed of 0-1 coded variables for 
+#' every rule, taking a value of 1 if the condition(s) of the rule apply, 0 if 
+#' the condition(s) of the rule do not apply. The objects in 
+#' \code{dictionaries} contain the conditions for every rule. 
+#' 
+#' The \code{interaction} objects contain rules with conditions on variables
+#' from two different views. These rules can accomodate cross-view interactions.
+#' The other objects contain rules with conditions on a single variable (thereby 
+#' accomodating main effects only).
 #' @export
 get_rules <- function(views, y, ntrees = 500, sampfrac = .632, learnrate = .01) {
   
@@ -278,11 +286,31 @@ get_rules <- function(views, y, ntrees = 500, sampfrac = .632, learnrate = .01) 
   rules_main <- rulemat[,colnames(rulemat) %in% 
                           dictionary$rule[dictionary$ruletype == "main"]]
   rules_main <- t(unique(t(rules_main)))
+  
   rules_interact <- rulemat[,colnames(rulemat) %in% 
                               dictionary$rule[dictionary$ruletype == "interaction"]]
   rules_interact <- t(unique(t(rules_interact)))
   
-  return(list(rules_main = rules_main,
-              rules_interact = rules_interact, 
-              dictionary = dictionary))    
+  dictionary <- dictionary[
+    dictionary$rule %in% c(colnames(rules_main), colnames(rules_interact)), ]
+  
+  view1_names <- dictionary$rule[dictionary$view1 == firstview & 
+                                   dictionary$ruletype == "main"]
+  view2_names <- dictionary$rule[dictionary$view1 == secondview & 
+                                   dictionary$ruletype == "main"]
+  interaction_names <- dictionary$rule[dictionary$ruletype == "interaction"]
+  
+  rules <- list(view1 = rules_main[, view1_names], 
+                view2 = rules_main[, view2_names], 
+                interaction = rules_interact)
+
+  dictionaries <- list(view1 = dictionary[dictionary$rule %in% view1_names, ],
+                       view2 = dictionary[dictionary$rule %in% view2_names, ],
+                       interaction = dictionary[dictionary$rule %in% interaction_names, ])
+  
+  if (!is.null(names(views))) {
+    names(rules) <- names(dictionaries) <- c(names(views), "interaction")
+  }
+  
+  return(list(rules = rules, dictionaries = dictionaries))
 }

@@ -1,7 +1,7 @@
 viewinteract: an R package for generating rules capturing cross-view interactions
 =================================================================================
 
-The main function is `get_rules()`. It takes a list of views as input; it outputs a list containing two matrices of 0-1 coded indicator variables (`rules_main`, which contains single-condition rules, that is: main effects; `rules_interact`, which contains two-condition rules for capturing cross-view interactions) and `dictionary`, which provides the conditions of the rules in the two matrices.
+The main function is `get_rules()`. It takes a list of views and a response variable as input; it outputs a list containing two lists: `rules` and `dictionaries`. The former contains three matrices of 0-1 coded indicator variables: `view1` and `view2`, which contain single-condition rules, based on the input variables from the respective views. If the views were supplied as a named list, these matrices will be names after the views they were generated from. Furthermore, `rules` contains a matrix `interact`, which contains rules with two conditions, each from a different view, thereby accomodating cross-view interactions. The `dictionaries` list contains objects with the same name and provides the conditions and further information on each of the rules in the `rules` matrices.
 
 Example: Generating rules for two views of airquality data
 ----------------------------------------------------------
@@ -10,7 +10,7 @@ We first create a list of two views of the same observations from the airquality
 
 ``` r
 viewA <- na.omit(airquality)[-1]
-viewB <- cbind(log(viewA), log(viewA))
+viewB <- cbind(log(viewA), apply(scale(viewA) > 0, 2, as.numeric))
 names(viewB) <- paste0(names(viewA), rep(1:2, each = ncol(viewA)))
 views <- list(viewA, viewB)
 ```
@@ -31,19 +31,34 @@ set.seed(42)
 new_views <- get_rules(views = views, y = y)
 ```
 
-The result is a list with three objects: matrices `rules_main` and `ruleS_interact` and a dataframe `dictionary`. The two matrices contain 0-1 coded indicator variables for different sets of rules, for the same number of observations:
+The result is a list with two objects: `rules` and `dictionaries`. The former contains three matrices, the first two containing main-effects rules, the last one (`interact`) containing cross-view interactions. The matrices contain 0-1 coded indicator variables for every rule:
 
 ``` r
-dim(new_views$rules_main)
-#> [1] 111  78
-dim(new_views$rules_interact)
-#> [1] 111 227
+dim(new_views$rules$view1)
+#> [1] 111  40
+dim(new_views$rules$view2)
+#> [1] 111  39
+dim(new_views$rules$interact)
+#> [1] 111 223
 ```
 
-For example, the first three single-condition rules for the first six observations look as follows:
+For example, the first three single-condition rules from the first view for the first six observations look as follows:
 
 ``` r
-new_views$rules_main[1:6, 1:3]
+new_views$rules$view1[1:6, 1:3]
+#>      rule52 rule65 rule79
+#> [1,]      1      1      1
+#> [2,]      1      0      0
+#> [3,]      1      0      0
+#> [4,]      1      1      1
+#> [5,]      1      1      1
+#> [6,]      1      1      1
+```
+
+Similarly, the first three single-condition rules for the second view:
+
+``` r
+new_views$rules$view2[1:6, 1:3]
 #>      rule1 rule2 rule9
 #> [1,]     1     0     1
 #> [2,]     1     1     1
@@ -53,10 +68,10 @@ new_views$rules_main[1:6, 1:3]
 #> [6,]     1     1     1
 ```
 
-Similarly, the first three two-condition rules for the first six observations look as follows:
+Finally, the first three two-condition rules for the first six observations look as follows:
 
 ``` r
-new_views$rules_interact[1:6, 1:3]
+new_views$rules$interact[1:6, 1:3]
 #>      rule4 rule5 rule11
 #> [1,]     0     1      1
 #> [2,]     1     0      1
@@ -66,19 +81,24 @@ new_views$rules_interact[1:6, 1:3]
 #> [6,]     1     0      1
 ```
 
-The `dictionary` shows the conditions for each rule in `rules_main` and `rules_interact`:
+The `dictionaries` provide the conditions for each rule in `rules`:
 
 ``` r
-head(new_views$dictionary, n = 8L)
+head(new_views$dictionaries$view1, n = 3L)
+#>      rule description ruletype view1 view2
+#> 52 rule52  Temp< 89.5     main     2     1
+#> 65 rule65  Temp< 67.5     main     2     1
+#> 79 rule79  Temp< 71.5     main     2     1
+head(new_views$dictionaries$view2, n = 3L)
+#>    rule    description ruletype view1 view2
+#> 1 rule1     Temp< 82.5     main     1     2
+#> 2 rule2 Solar.R1< 5.03     main     1     2
+#> 9 rule9   Temp1< 4.363     main     1     2
+head(new_views$dictionaries$interact, n = 3L)
 #>      rule                 description    ruletype view1 view2
-#> 1   rule1                  Temp< 82.5        main     1     2
-#> 2   rule2              Solar.R1< 5.03        main     1     2
 #> 4   rule4 Temp< 82.5 & Solar.R1< 5.03 interaction     1     2
 #> 5   rule5 Temp< 82.5 & Solar.R1>=5.03 interaction     1     2
-#> 9   rule9                Temp1< 4.363        main     1     2
 #> 11 rule11   Temp< 82.5 & Temp1< 4.363 interaction     1     2
-#> 12 rule12   Temp< 82.5 & Temp1>=4.363 interaction     1     2
-#> 15 rule15                  Temp< 77.5        main     1     2
 ```
 
 Work to do
